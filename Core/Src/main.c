@@ -124,20 +124,20 @@ int main(void)
   
   SSD1306_Clear();
 
-  // SSD1306_DrawBitmap(0, 0, logo, 128, 64, 1);
-  // SSD1306_UpdateScreen();
-  // SSD1306_ScrollRight(0x00, 0x0f);
-  // printSr("Scroll Right\n\r");
-  // HAL_Delay(2000);
-  // SSD1306_ScrollLeft(0x00, 0x0f);
-  // printSr("Scroll Left\n\r");
-  // HAL_Delay(2000);
-  // SSD1306_Scrolldiagleft(0x00, 0x0f);
-  // printSr("Scroll Diagonal Left\n\r");
-  // HAL_Delay(2000);
-  // SSD1306_Scrolldiagright(0x00, 0x0f);
-  // printSr("Scroll Diagonal Right\n\r");
-  // HAL_Delay(2000);
+  SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
+  SSD1306_UpdateScreen();
+  SSD1306_ScrollRight(0x00, 0x0f);
+  printf("Scroll Right\n\r");
+  HAL_Delay(2000);
+  SSD1306_ScrollLeft(0x00, 0x0f);
+  printf("Scroll Left\n\r");
+  HAL_Delay(2000);
+  SSD1306_Scrolldiagleft(0x00, 0x0f);
+  printf("Scroll Diagonal Left\n\r");
+  HAL_Delay(2000);
+  SSD1306_Scrolldiagright(0x00, 0x0f);
+  printf("Scroll Diagonal Right\n\r");
+  HAL_Delay(2000);
 
 
   /* USER CODE END 2 */
@@ -146,7 +146,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int inverted = 0;
   int delayTime = 0;
-  //SSD1306_Stopscroll();
+  SSD1306_Stopscroll();
   while (1)
   {
     /* USER CODE END WHILE */
@@ -202,11 +202,7 @@ int main(void)
       SSD1306_Clear();
       sprintf(data, "%d", (int)tim2_cnt);
       SSD1306_GotoXY(0, 0);
-      SSD1306_Puts(data, &Font_11x18, 1);
-      SSD1306_GotoXY(0, 19);
-      SSD1306_Puts(data, &Font_11x18, 1);
-      SSD1306_GotoXY(0, 38);
-      SSD1306_Puts(data, &Font_11x18, 1);
+      SSD1306_Puts(data, &Font_16x26, 1);
       SSD1306_UpdateScreen();
       printf("%d\n\r", (int)tim2_cnt);
       

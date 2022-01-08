@@ -26,6 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "usbd_cdc_if.h"
 #include "string.h"
 #include "fonts.h"
@@ -106,19 +107,19 @@ int main(void)
   HAL_Delay(1000);
 
   SSD1306_Init();
-  printSr("OLED Init\n\r");
+  printf("OLED Init\n\r");
 
   SSD1306_GotoXY(0, 0);
   SSD1306_Puts("HELLO", &Font_16x26, 1);
   SSD1306_GotoXY(10, 30);
   SSD1306_Puts("WORLD", &Font_16x26, 1);
   SSD1306_UpdateScreen();
-  printSr("Print Hello World\n\r");
+  printf("Print Hello World\n\r");
 
   //HAL_Delay(2500);
 
   SSD1306_Scrolldiagright(0x00, 0x0f);
-  printSr("Scroll Right\n\r");
+  printf("Scroll Right\n\r");
   HAL_Delay(2000);
   
   SSD1306_Clear();
@@ -199,7 +200,6 @@ int main(void)
     {
       old_tim2_cnt = tim2_cnt;
       SSD1306_Clear();
-      //char yuk[50];
       sprintf(data, "%d", (int)tim2_cnt);
       SSD1306_GotoXY(0, 0);
       SSD1306_Puts(data, &Font_11x18, 1);
@@ -208,8 +208,7 @@ int main(void)
       SSD1306_GotoXY(0, 38);
       SSD1306_Puts(data, &Font_11x18, 1);
       SSD1306_UpdateScreen();
-      sprintf(data, "%s\n\r", data);
-      printSr(data);
+      printf("%d\n\r", (int)tim2_cnt);
       
       //HAL_Delay(100);
     }
@@ -311,6 +310,15 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+// Overridden to enable printf over USB Virtual Com Port
+// osDelay is there in case it doesnt work with FreeRTOS
+int _write(int file, char *ptr, int len) { 
+    CDC_Transmit_FS((uint8_t*) ptr, len); 
+    //osDelay(1);
+    return len; 
+}
+
 void printSr(uint8_t* msg)
 {
   CDC_Transmit_FS((uint8_t *)msg, strlen(msg));

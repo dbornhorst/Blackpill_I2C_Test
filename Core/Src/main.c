@@ -34,6 +34,7 @@
 #include "test.h"
 #include "bitmap.h"
 #include "horse_anim.h"
+#include "my_flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,8 +56,12 @@
 /* USER CODE BEGIN PV */
 char data [50];
 volatile uint32_t tim2_cnt = 0;
+uint16_t SPIdata[] = {0x0001};
 
 uint32_t old_tim2_cnt = 0;
+
+uint8_t myTestWrite[5] = {0x11, 0x22, 0x33, 0x44, 0x55};
+uint8_t myTestRead[5];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,7 +98,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -103,6 +108,9 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  MY_FLASH_SetSectorAddrs(11, 0x080E0000); // set user flash to last sector
+
+  //MY_FLASH_WriteN(0, myTestWrite, 5, DATA_TYPE_8);
 
   HAL_Delay(1000);
 
@@ -115,6 +123,8 @@ int main(void)
   SSD1306_Puts("WORLD", &Font_16x26, 1);
   SSD1306_UpdateScreen();
   printf("Print Hello World\n\r");
+
+  SPIdata[0] = 0xFF00; // = 1 1 1 1  1 1 1 1  1 1 1 1  1 1 1 1
 
   //HAL_Delay(2500);
 
@@ -153,6 +163,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+    // Toggle USER_LED and invert diplay @ 1Hz
     // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     // SSD1306_InvertDisplay(inverted);
     // if(inverted == 0) inverted = 1;
@@ -160,13 +171,7 @@ int main(void)
     // HAL_Delay(1000);  
     // printSr("OH NO FUCK\n\r");
 
-
-    // SSD1306_ScrollRight(0x00, 0x0f);
-    // printSr("Scroll Right\n\r");
-    // HAL_Delay(2000);
-    // SSD1306_ScrollLeft(0x00, 0x0f);
-    // printSr("Scroll Left\n\r");
-    // HAL_Delay(2000);
+    // Moog Logo Scroll "Screensaver"
     // SSD1306_Scrolldiagleft(0x00, 0x0f);
     // printSr("Scroll Diagonal Left\n\r");
     // HAL_Delay(2000);
@@ -174,8 +179,9 @@ int main(void)
     // printSr("Scroll Diagonal Right\n\r");
     // HAL_Delay(2000);
 
-    tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2)/2;
 
+    // Attempt at reading DHT22 Temp and Humid sensor
+    // Not currently working
     // if(oldTemp != tempC || oldHum != humidity)
     // {
     //   oldTemp = tempC;
@@ -196,6 +202,8 @@ int main(void)
     // }
     // HAL_Delay(1000);
 
+    // Read and diplay current encoder count 
+    tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2)/2;
     if(tim2_cnt != old_tim2_cnt)
     {
       old_tim2_cnt = tim2_cnt;
@@ -205,10 +213,16 @@ int main(void)
       SSD1306_Puts(data, &Font_16x26, 1);
       SSD1306_UpdateScreen();
       printf("%d\n\r", (int)tim2_cnt);
+      HAL_Delay(5000);
+      //MY_FLASH_ReadN(0, myTestRead, 5, DATA_TYPE_8);
       
-      //HAL_Delay(100);
+      SSD1306_Clear();
+      SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
+      SSD1306_UpdateScreen();
     }
 
+    // Horse Animation
+    // {
     // SSD1306_Clear();
     // SSD1306_DrawBitmap(0, 0, horse1, 128, 64, 1);
     // SSD1306_UpdateScreen();
@@ -258,6 +272,7 @@ int main(void)
     // SSD1306_DrawBitmap(0, 0, horse10, 128, 64, 1);
     // SSD1306_UpdateScreen();
     // //HAL_Delay(delayTime);
+    // }
   }
   /* USER CODE END 3 */
 }
@@ -315,10 +330,6 @@ int _write(int file, char *ptr, int len) {
     return len; 
 }
 
-void printSr(uint8_t* msg)
-{
-  CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
-}
 /* USER CODE END 4 */
 
 /**

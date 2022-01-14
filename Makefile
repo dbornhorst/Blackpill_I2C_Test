@@ -44,6 +44,7 @@ Core/Src/stm32f4xx_hal_msp.c \
 Core/Src/fonts.c \
 Core/Src/test.c \
 Core/Src/ssd1306.c \
+Core/Src/my_flash.c \
 USB_DEVICE/App/usb_device.c \
 USB_DEVICE/App/usbd_desc.c \
 USB_DEVICE/App/usbd_cdc_if.c \

@@ -40,6 +40,7 @@ Core/Src/fonts.c \
 Core/Src/gpio.c \
 Core/Src/i2c.c \
 Core/Src/main.c \
+Core/Src/my_flash.c \
 Core/Src/ssd1306.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Core/Src/stm32f4xx_it.c \

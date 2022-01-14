@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "spi.h"
 #include "tim.h"
 #include "usb_device.h"
 #include "gpio.h"
@@ -73,6 +74,13 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+ uint32_t counter = 0;
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
+{
+  counter = __HAL_TIM_GET_COUNTER(htim);
+  //printf("%d\n\r", (int)counter);
+}
 /* USER CODE END 0 */
 
 /**
@@ -106,8 +114,10 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_DEVICE_Init();
   MX_TIM2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  //HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL);
   MY_FLASH_SetSectorAddrs(11, 0x080E0000); // set user flash to last sector
 
   //MY_FLASH_WriteN(0, myTestWrite, 5, DATA_TYPE_8);
@@ -138,16 +148,14 @@ int main(void)
   SSD1306_UpdateScreen();
   SSD1306_ScrollRight(0x00, 0x0f);
   printf("Scroll Right\n\r");
-  HAL_Delay(2000);
-  SSD1306_ScrollLeft(0x00, 0x0f);
-  printf("Scroll Left\n\r");
-  HAL_Delay(2000);
-  SSD1306_Scrolldiagleft(0x00, 0x0f);
-  printf("Scroll Diagonal Left\n\r");
-  HAL_Delay(2000);
-  SSD1306_Scrolldiagright(0x00, 0x0f);
-  printf("Scroll Diagonal Right\n\r");
-  HAL_Delay(2000);
+  HAL_Delay(4000);
+  // HAL_Delay(2000);
+  // SSD1306_Scrolldiagleft(0x00, 0x0f);
+  // printf("Scroll Diagonal Left\n\r");
+  // HAL_Delay(2000);
+  // SSD1306_Scrolldiagright(0x00, 0x0f);
+  // printf("Scroll Diagonal Right\n\r");
+  // HAL_Delay(2000);
 
 
   /* USER CODE END 2 */
@@ -173,10 +181,10 @@ int main(void)
 
     // Moog Logo Scroll "Screensaver"
     // SSD1306_Scrolldiagleft(0x00, 0x0f);
-    // printSr("Scroll Diagonal Left\n\r");
+    // printf("Scroll Diagonal Left\n\r");
     // HAL_Delay(2000);
     // SSD1306_Scrolldiagright(0x00, 0x0f);
-    // printSr("Scroll Diagonal Right\n\r");
+    // printf("Scroll Diagonal Right\n\r");
     // HAL_Delay(2000);
 
 
@@ -212,13 +220,14 @@ int main(void)
       SSD1306_GotoXY(0, 0);
       SSD1306_Puts(data, &Font_16x26, 1);
       SSD1306_UpdateScreen();
-      printf("%d\n\r", (int)tim2_cnt);
-      HAL_Delay(5000);
+      //printf("%d\n\r", (int)tim2_cnt);
+      printf("%d\n\r", (int)counter);
+      //HAL_Delay(5000);
       //MY_FLASH_ReadN(0, myTestRead, 5, DATA_TYPE_8);
       
-      SSD1306_Clear();
-      SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
-      SSD1306_UpdateScreen();
+      // SSD1306_Clear();
+      // SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
+      // SSD1306_UpdateScreen();
     }
 
     // Horse Animation
@@ -329,6 +338,11 @@ int _write(int file, char *ptr, int len) {
     //osDelay(1);
     return len; 
 }
+
+// void TIM2_IRQHandler(void)
+// {
+//     printf("%d\n\r", (int)(__HAL_TIM_GET_COUNTER(&htim2)/2));
+// }
 
 /* USER CODE END 4 */
 

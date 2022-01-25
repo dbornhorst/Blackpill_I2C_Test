@@ -63,6 +63,7 @@ uint32_t old_tim2_cnt = 0;
 
 uint8_t myTestWrite[5] = {0x11, 0x22, 0x33, 0x44, 0x55};
 uint8_t myTestRead[5];
+uint8_t readBuffer[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

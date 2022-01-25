@@ -223,6 +223,7 @@ int main(void)
       SSD1306_UpdateScreen();
       //printf("%d\n\r", (int)tim2_cnt);
       printf("%d\n\r", (int)counter);
+      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
       //HAL_Delay(5000);
       //MY_FLASH_ReadN(0, myTestRead, 5, DATA_TYPE_8);
       

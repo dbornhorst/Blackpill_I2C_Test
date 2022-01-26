@@ -55,15 +55,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-char data [50];
-volatile uint32_t tim2_cnt = 0;
 uint16_t SPIdata[] = {0x0001};
 
-uint32_t old_tim2_cnt = 0;
+// Encoder value changed flag
+uint8_t encoderCountChanged = 0;
 
+// Flash Memory Test Vars
 uint8_t myTestWrite[5] = {0x11, 0x22, 0x33, 0x44, 0x55};
 uint8_t myTestRead[5];
+
+// Buffer for USB serial read
 uint8_t readBuffer[64];
+uint8_t bufferUpdated = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,13 +79,12 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
- uint32_t counter = 0;
-
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
 {
-  counter = __HAL_TIM_GET_COUNTER(htim);
-  //printf("%d\n\r", (int)counter);
+  uint32_t counter = __HAL_TIM_GET_COUNTER(htim);
+  encoderCountChanged++;
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -189,47 +192,33 @@ int main(void)
     // HAL_Delay(2000);
 
 
-    // Attempt at reading DHT22 Temp and Humid sensor
-    // Not currently working
-    // if(oldTemp != tempC || oldHum != humidity)
-    // {
-    //   oldTemp = tempC;
-    //   oldHum = humidity;
-    //   SSD1306_Clear();
-    //   //char yuk[50];
-    //   sprintf(data, "Temp = %.1f", tempC);
-    //   SSD1306_GotoXY(0, 0);
-    //   SSD1306_Puts(data, &Font_11x18, 1);
-
-    //   sprintf(data, "Humidity = %.1f", humidity);
-    //   SSD1306_GotoXY(0, 30);
-    //   SSD1306_Puts(data, &Font_11x18, 1);
-    //   SSD1306_UpdateScreen();
-
-    //   sprintf(data, "Temp =\t %.1f\r\nHumidity (%%)= \t %.1f%%\r\n", tempC, humidity);
-    //   printSr(data);
-    // }
-    // HAL_Delay(1000);
-
     // Read and diplay current encoder count 
-    tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2)/2;
-    if(tim2_cnt != old_tim2_cnt)
+    if(encoderCountChanged > 1)
     {
-      old_tim2_cnt = tim2_cnt;
+      uint32_t tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2) / 2;
       SSD1306_Clear();
-      sprintf(data, "%d", (int)tim2_cnt);
+      char data [16];
+      sprintf(data, "%d", tim2_cnt);
       SSD1306_GotoXY(0, 0);
       SSD1306_Puts(data, &Font_16x26, 1);
       SSD1306_UpdateScreen();
       //printf("%d\n\r", (int)tim2_cnt);
-      printf("%d\n\r", (int)counter);
+      printf("%d\n\r", tim2_cnt);
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+      encoderCountChanged = 0;
       //HAL_Delay(5000);
       //MY_FLASH_ReadN(0, myTestRead, 5, DATA_TYPE_8);
       
       // SSD1306_Clear();
       // SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
       // SSD1306_UpdateScreen();
+    }
+
+
+    if(bufferUpdated)
+    {
+      printf("%c\n\r", readBuffer[0]);
+      bufferUpdated = 0;
     }
 
     // Horse Animation

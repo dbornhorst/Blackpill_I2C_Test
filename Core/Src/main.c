@@ -168,6 +168,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int inverted = 0;
   int delayTime = 0;
+  uint8_t outputBuffer = 0x01;
   SSD1306_Stopscroll();
   while (1)
   {
@@ -193,6 +194,8 @@ int main(void)
 
 
     // Read and diplay current encoder count 
+
+    /*
     if(encoderCountChanged > 1)
     {
       uint32_t tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2) / 2;
@@ -217,9 +220,19 @@ int main(void)
 
     if(bufferUpdated)
     {
-      printf("%c\n\r", readBuffer[0]);
+      printf("> %c\n\r", readBuffer[0]);
       bufferUpdated = 0;
     }
+    */
+
+    // Test SPI Shift Out
+    HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(&hspi1, &outputBuffer, 1, 1); 
+    HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_SET);
+    outputBuffer = (outputBuffer << 1);
+    if (outputBuffer == 0) outputBuffer = 1;
+    HAL_Delay(100);
+    
 
     // Horse Animation
     // {

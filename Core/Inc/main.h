@@ -62,6 +62,8 @@ void printSr(uint8_t* msg);
 #define LED_GPIO_Port GPIOC
 #define BUTTON_Pin GPIO_PIN_0
 #define BUTTON_GPIO_Port GPIOA
+#define SHFT_LATCH_Pin GPIO_PIN_9
+#define SHFT_LATCH_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

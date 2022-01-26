@@ -123,6 +123,10 @@ int main(void)
   //HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL);
   MY_FLASH_SetSectorAddrs(11, 0x080E0000); // set user flash to last sector
+  uint8_t clearShiftRef = 0x00;
+  HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi1, &clearShiftRef, 1, 1); 
+  HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_SET);
 
   //MY_FLASH_WriteN(0, myTestWrite, 5, DATA_TYPE_8);
 
@@ -195,18 +199,28 @@ int main(void)
 
     // Read and diplay current encoder count 
 
-    /*
+    
     if(encoderCountChanged > 1)
     {
       uint32_t tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2) / 2;
-      SSD1306_Clear();
       char data [16];
+
+      // Write Time value to OLED
+      SSD1306_Clear();
       sprintf(data, "%d", tim2_cnt);
       SSD1306_GotoXY(0, 0);
       SSD1306_Puts(data, &Font_16x26, 1);
       SSD1306_UpdateScreen();
-      //printf("%d\n\r", (int)tim2_cnt);
+
+      // Shift Counter value to register diplaying binary on LEDs
+      HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_RESET);
+      HAL_SPI_Transmit(&hspi1, &tim2_cnt, 1, 1); 
+      HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_SET);
+
+      // Write counter value to USB serial
       printf("%d\n\r", tim2_cnt);
+
+      //Flash On board LED with value chage
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
       encoderCountChanged = 0;
       //HAL_Delay(5000);
@@ -223,15 +237,17 @@ int main(void)
       printf("> %c\n\r", readBuffer[0]);
       bufferUpdated = 0;
     }
-    */
-
+    
+/*
     // Test SPI Shift Out
     HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(&hspi1, &outputBuffer, 1, 1); 
     HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_SET);
-    outputBuffer = (outputBuffer << 1);
+    //outputBuffer = (outputBuffer << 1);
+    outputBuffer <<= 1;
     if (outputBuffer == 0) outputBuffer = 1;
     HAL_Delay(100);
+*/
     
 
     // Horse Animation

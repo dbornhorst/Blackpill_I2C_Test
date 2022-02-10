@@ -26,7 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "fonts.h"
+#include "spi.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,6 +48,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern uint8_t encoderCountChanged;
+extern uint8_t readBuffer[64];
+extern uint8_t bufferUpdated;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -57,7 +62,7 @@ osSemaphoreId myBinarySem01Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+extern void SSD1306_Clear (void);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -155,6 +160,43 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    if(encoderCountChanged > 1)
+    {
+      uint32_t tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2) / 2;
+      char data [16];
+
+      // Write Time value to OLED
+      SSD1306_Clear();
+      sprintf(data, "%d", tim2_cnt);
+      SSD1306_GotoXY(0, 0);
+      SSD1306_Puts(data, &Font_16x26, 1);
+      SSD1306_UpdateScreen();
+
+      // Shift Counter value to register diplaying binary on LEDs
+      HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_RESET);
+      HAL_SPI_Transmit(&hspi1, &tim2_cnt, 1, 1); 
+      HAL_GPIO_WritePin(SHFT_LATCH_GPIO_Port, SHFT_LATCH_Pin, GPIO_PIN_SET);
+
+      // Write counter value to USB serial
+      printf("%d\n\r", tim2_cnt);
+
+      //Flash On board LED with value chage
+      HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+      encoderCountChanged = 0;
+      //HAL_Delay(5000);
+      //MY_FLASH_ReadN(0, myTestRead, 5, DATA_TYPE_8);
+      
+      // SSD1306_Clear();
+      // SSD1306_DrawBitmap(0, 0, moog_logo, 128, 64, 1);
+      // SSD1306_UpdateScreen();
+    }
+
+
+    if(bufferUpdated)
+    {
+      printf("> %c\n\r", readBuffer[0]);
+      bufferUpdated = 0;
+    }
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */

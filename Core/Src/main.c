@@ -158,6 +158,7 @@ int main(void)
   SSD1306_ScrollRight(0x00, 0x0f);
   printf("Scroll Right\n\r");
   HAL_Delay(4000);
+  SSD1306_Stopscroll();
   // HAL_Delay(2000);
   // SSD1306_Scrolldiagleft(0x00, 0x0f);
   // printf("Scroll Diagonal Left\n\r");
@@ -180,7 +181,6 @@ int main(void)
   int inverted = 0;
   int delayTime = 0;
   uint8_t outputBuffer = 0x01;
-  SSD1306_Stopscroll();
   while (1)
   {
     /* USER CODE END WHILE */
@@ -206,7 +206,7 @@ int main(void)
 
     // Read and diplay current encoder count 
 
-    
+    /*
     if(encoderCountChanged > 1)
     {
       uint32_t tim2_cnt = __HAL_TIM_GET_COUNTER(&htim2) / 2;
@@ -244,6 +244,8 @@ int main(void)
       printf("> %c\n\r", readBuffer[0]);
       bufferUpdated = 0;
     }
+    */
+    
     
 /*
     // Test SPI Shift Out

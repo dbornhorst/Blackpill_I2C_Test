@@ -52,6 +52,11 @@ extern uint8_t encoderCountChanged;
 extern uint8_t readBuffer[64];
 extern uint8_t bufferUpdated;
 
+osThreadId displayTaskHandle;
+osThreadId shiftOutTaskHandle;
+osThreadId usbPrintTaskHandle;
+osThreadId encoderTaskHandle;
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osMessageQId myQueue01Handle;
@@ -62,7 +67,12 @@ osSemaphoreId myBinarySem01Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-extern void SSD1306_Clear (void);
+
+void StartDisplayTask(void const * argument);
+void StartShiftOutTask(void const * argument);
+void StartUSBPrintTask(void const * argument);
+void StartEncoderTask(void const * argument);
+
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -140,7 +150,17 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
+  osThreadDef(diplayTask, StartDisplayTask, osPriorityNormal, 0, 128);
+  displayTaskHandle = osThreadCreate(osThread(diplayTask), NULL);
+
+  osThreadDef(shiftOutTask, StartShiftOutTask, osPriorityNormal, 0, 128);
+  shiftOutTaskHandle = osThreadCreate(osThread(shiftOutTask), NULL);
+
+  osThreadDef(usbPrintTask, StartUSBPrintTask, osPriorityNormal, 0, 128);
+  usbPrintTaskHandle = osThreadCreate(osThread(usbPrintTask), NULL);
+
+  osThreadDef(encoderTask, StartEncoderTask, osPriorityNormal, 0, 128);
+  encoderTaskHandle = osThreadCreate(osThread(encoderTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
 }
@@ -155,7 +175,7 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void const * argument)
 {
   /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
+  // MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
   for(;;)
@@ -191,12 +211,6 @@ void StartDefaultTask(void const * argument)
       // SSD1306_UpdateScreen();
     }
 
-
-    if(bufferUpdated)
-    {
-      printf("> %c\n\r", readBuffer[0]);
-      bufferUpdated = 0;
-    }
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
@@ -205,6 +219,42 @@ void StartDefaultTask(void const * argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
+void StartDisplayTask(void const * argument)
+{
+  for(;;)
+  {
+    osDelay(1);
+  }
+}
+
+void StartShiftOutTask(void const * argument)
+{
+  for(;;)
+  {
+    osDelay(1);
+  }
+}
+
+void StartUSBPrintTask(void const * argument)
+{
+  for(;;)
+  {
+    if(bufferUpdated)
+    {
+      printf("> %c\n\r", readBuffer[0]);
+      bufferUpdated = 0;
+    }
+    osDelay(1);
+  }
+}
+
+void encoderTask(void const * argument)
+{
+  for(;;)
+  {
+    osDelay(1);
+  }
+}
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
